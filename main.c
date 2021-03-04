@@ -45,6 +45,7 @@ struct List new_node_end(struct List, DataType);
 struct List delete_node(struct List);
 struct List delete_node_beg(struct List);
 struct List delete_node_end(struct List);
+struct List clear_list(struct List);
 void delete_node_mid(list);
 int write_file(char* filename, struct List);
 int timeContToInt(struct TimeCont);
@@ -68,7 +69,7 @@ int main(int argc, char* argv[])
 	do
 	{
 		system("CLS");
-		puts("1. Organized add\n2. Show\n3. Search\n4. Delete\n5. Insert(!CORRUPTS LIST'S ORGANIZATION)\n6. Insert to beginning(!CORRUPTS LIST'S ORGANIZATION)\n7. Insert to the end(!CORRUPTS LIST'S ORGANIZATION)\n8. Exit");
+		puts("1. Organized add\n2. Show\n3. Search\n4. Delete\n5. Insert(!CORRUPTS LIST'S ORGANIZATION)\n6. Insert to beginning(!CORRUPTS LIST'S ORGANIZATION)\n7. Insert to the end(!CORRUPTS LIST'S ORGANIZATION)\n8. Clear list\n9. Exit");
 		mnCh = getchar(); getchar();
 
 		switch (mnCh)
@@ -79,9 +80,10 @@ int main(int argc, char* argv[])
 		case '4': trains = delete_node(trains); break;
 		case '5': trains = new_node_create(trains, input_train()); break;
 		case '6': trains = new_node_start(trains, input_train()); break;
-		case '7': trains = new_node_end(trains, input_train());
+		case '7': trains = new_node_end(trains, input_train()); break;
+		case '8': trains = clear_list(trains);
 		}
-	} while (mnCh != '8');
+	} while (mnCh != '9');
 
 	system("CLS");
 	puts("Do you want to save entered list?(y/n)");
@@ -278,16 +280,9 @@ struct List new_node_insert(struct Node* plist, DataType new_train)
 
 	temp->data = new_train;
 	temp->prev = plist;
-	plist = plist->next;
-	temp->next = plist;		/*TODO: read accesss violation error			!!!pointer to prev is fubar*/
+	temp->next = plist->next;
 	plist->next = temp;
-	if (temp->next)
-		temp->next->prev = temp;
-	else
-	{
-		perror("ERROR: TRYING TO ACCESS INVALID MEMORY(new_node_insert)");
-		getchar();
-	}
+	temp->next->prev = temp;
 }
 
 struct List new_node_end(struct List plist, DataType new_train)		/*Appends a new node to the end of the list, returns updated list descriptor*/
@@ -325,11 +320,14 @@ void print_list(struct List cur)		/*This function prints contents of linked list
 		return;
 	}
 
+	puts("|  N |  Station name  |Dep.time|Trav.time|Av.tickets|");
+	puts("|----|----------------|--------|---------|----------|");
+
 	while (cur.begin != NULL)
 	{
-		printf("|%4d|%16s| %2s:%2s  |  %2s:%2s  |    %c    |\n", cur.begin->data.number, cur.begin->data.stName,
+		printf("|%4d|%16s| %2s:%2s  |  %2s:%2s  |    %c     |\n", cur.begin->data.number, cur.begin->data.stName,
 			cur.begin->data.depTime.hrs, cur.begin->data.depTime.mins, cur.begin->data.travTime.hrs, cur.begin->data.travTime.mins, cur.begin->data.avTick);
-		cur.begin = cur.begin->next;		/*cur.begin->prev*/
+		cur.begin = cur.begin->next;
 
 		offset++;
 	}
@@ -372,8 +370,6 @@ void print_list_structure(struct List plist)
 		printf("<|%4d|>", plist.end->data.number);
 		plist.end = plist.end->prev;
 	}
-
-	getchar();
 }
 
 void search_list(struct List cur)
@@ -524,7 +520,10 @@ struct List delete_node_end(struct List plist)				/*Delete's node in the end of 
 	{
 		tmp = plist.end;
 		plist.end = plist.end->prev;
-		plist.end->next = NULL;			/*TODO: ERRROR CHECK*/
+		if (plist.end)
+			plist.end->next = NULL;			/*TODO: ERRROR CHECK*/
+		else
+			plist.begin = NULL;
 		free(tmp);
 
 		return plist;
@@ -543,45 +542,21 @@ void delete_node_mid(struct Node* pnode)
 	free(pnode);
 }
 
-/*void delete_node(list begin)
+struct List clear_list(struct List plist)			/*Clear's whole list and null's the descriptor*/
 {
-	struct node* temp = begin;
-	int posn, i;
+	list tmp;
 
-	if (begin == NULL)
+	while (plist.begin)
 	{
-		system("CLS");
-		puts("Can't delete nodes from non-existent list.");
-		getchar();
-		return;
+		tmp = plist.begin;
+		plist.begin = plist.begin->next;
+		free(tmp);
 	}
+
+	nullTheList(&plist);
 
 	system("CLS");
-	puts("Enter the position you want to delete");
-	scanf("%d", &posn);
+	printf("List is emptied");
 
-	if (posn == 1)
-	{
-
-	}
-
-	for(i = 0; i < posn && temp != NULL; i++)
-		temp = temp->next;
-
-	if (temp == NULL)
-	{
-		system("CLS");
-		puts("Can't delete non-existent node.");
-		getchar();
-		return;
-	}
-	else
-	{
-
-
-		temp = begin;
-		begin = begin->next;
-
-		free(temp);
-	}
-}*/
+	return plist;
+}
