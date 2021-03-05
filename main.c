@@ -55,6 +55,7 @@ void delete_list(list);
 void edit_list(list);
 void print_list(struct List);
 void print_tabs(struct List);
+void print_tabs_rev(struct List);
 void print_list_structure(struct List);
 void search_list(struct List);
 
@@ -71,7 +72,7 @@ int main(int argc, char* argv[])
 	do
 	{
 		system("CLS");
-		puts("1. Organized add\n2. Show\n3. Search\n4. Delete\n5. Insert(!CORRUPTS LIST'S ORGANIZATION)\n6. Insert to beginning(!CORRUPTS LIST'S ORGANIZATION)\n7. Insert to the end(!CORRUPTS LIST'S ORGANIZATION)\n8. Clear list\n9. Exit");
+		puts("1. Organized add\n2. Show\n3. Search\n4. Delete\n5. Insert(!CORRUPTS LIST'S ORGANIZATION)\n6. Insert to beginning(!CORRUPTS LIST'S ORGANIZATION)\n7. Insert to the end(!CORRUPTS LIST'S ORGANIZATION)\n8. Clear list\n9. PrintList\na. RevPrintTabs\nb. Exit");
 		mnCh = getchar(); getchar();
 
 		switch (mnCh)
@@ -83,9 +84,11 @@ int main(int argc, char* argv[])
 		case '5': trains = new_node_create(trains, input_train()); break;
 		case '6': trains = new_node_start(trains, input_train()); break;
 		case '7': trains = new_node_end(trains, input_train()); break;
-		case '8': trains = clear_list(trains);
+		case '8': trains = clear_list(trains); break;
+		case '9': print_list(trains); break;
+		case 'a': print_tabs_rev(trains);
 		}
-	} while (mnCh != '9');
+	} while (mnCh != 'b');
 
 	system("CLS");
 	puts("Do you want to save entered list?(y/n)");
@@ -112,6 +115,8 @@ int main(int argc, char* argv[])
 			}
 		} while (mnCh != '1' && mnCh != '2');
 	}
+
+	clear_list(trains);
 
 	return 0;
 }
@@ -430,6 +435,90 @@ void print_tabs(struct List plist)
 	} while (dr != 'e' && dr != 'E');
 }
 
+void print_tabs_rev(struct List plist)
+{
+	char dr = NULL;
+	int i = 0, offset = 0;
+	struct Node* tmp = plist.end;
+
+	system("CLS");
+	if (plist.end == NULL)
+	{
+		puts("List is empty");
+		getchar();
+		return;
+	}
+
+	do
+	{
+		system("CLS");
+		puts("|  N |  Station name  |Dep.time|Trav.time|Av.tickets|");
+		puts("|----|----------------|--------|---------|----------|");
+
+		for (offset = 0; plist.end && offset < N_OF_TABS; offset++)
+		{
+			printf("|%4d|%16s| %2s:%2s  |  %2s:%2s  |    %c     |\n", plist.end->data.number, plist.end->data.stName,
+				plist.end->data.depTime.hrs, plist.end->data.depTime.mins, plist.end->data.travTime.hrs, plist.end->data.travTime.mins, plist.end->data.avTick);
+
+			plist.end = plist.end->prev;
+			i++;
+		}
+		puts("|____|________________|________|_________|__________|");
+		if (plist.end)
+		{
+			if (tmp->next == NULL)
+				puts("                                                   r>");
+			else
+				puts("<l                                                 r>");
+		}
+		else if (i <= N_OF_TABS)
+		{
+			puts("                                                     ");
+			getchar();
+			return;
+		}
+		else
+			puts("<l                                                   ");
+		puts("                  Enter 'e' to exit");
+		scanf("%c", &dr); getchar();
+		if (dr == 'l')
+		{
+			if (plist.end)
+			{
+				if (plist.end->next == NULL)
+				{
+					printf("\nInvalid direction");
+					getchar();
+				}
+				else
+				{
+					for (offset = 0; offset < N_OF_TABS && tmp->next; offset++)
+						tmp = tmp->next;
+					plist.end = tmp;
+				}
+			}
+			else
+			{
+				for (i = 0; i <= offset + 1; i++)
+					tmp = tmp->next;
+				plist.end = tmp;
+			}
+		}
+		else if (dr == 'r')
+		{
+			if (plist.end == NULL)
+			{
+				plist.end = tmp;
+				printf("\nInvalid direction");
+				getchar();
+			}
+			else
+				tmp = plist.end;
+		}
+
+	} while (dr != 'e' && dr != 'E');
+}
+
 void print_list_structure(struct List plist)
 {
 	system("CLS");
@@ -558,7 +647,7 @@ struct List delete_node(struct List plist)
 	printf("List's structure:\n");
 	print_list_structure(plist);
 	printf("\nEnter number you want to delete: ");
-	scanf("%d", &kNumb);
+	scanf("%d", &kNumb); getchar();
 	while (tmp.begin != NULL && kNumb != tmp.begin->data.number)
 		tmp.begin = tmp.begin->next;
 
