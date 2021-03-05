@@ -209,20 +209,28 @@ struct List new_node_org(struct List plist, DataType new_train)			/*Organized ad
 {
 	struct List tempList = plist;
 
-	if (plist.begin == NULL)
+	if (plist.begin == NULL || plist.begin->data.number >= new_train.number)
 		plist = new_node_start(plist, new_train);
 	else
 	{
+		tempList.begin = tempList.begin->next;
 
-		while (tempList.begin != NULL && new_train.number >= tempList.begin->data.number)/**/
-			tempList.begin = tempList.begin->next;
-
-		if (tempList.begin == NULL)
+		if(plist.end->data.number <= new_train.number)
 			plist = new_node_end(plist, new_train);
 		else
 		{
-			tempList.begin = tempList.begin->prev;
-			new_node_insert(tempList.begin, new_train);
+			while (tempList.begin != NULL && new_train.number >= tempList.begin->data.number)/**/
+				tempList.begin = tempList.begin->next;
+			if (tempList.begin)
+			{
+				tempList.begin = tempList.begin->prev;
+				new_node_insert(tempList.begin, new_train);
+			}
+			else
+			{
+				printf("\nERROR: INVALID ADDRES");
+				getchar();
+			}
 		}
 	}
 
@@ -341,7 +349,7 @@ void print_list(struct List cur)		/*This function prints contents of linked list
 void print_tabs(struct List plist)
 {
 	char dr = NULL;
-	int i, offset = 0;
+	int i = 0, offset = 0;
 	struct Node* tmp = plist.begin;
 
 	system("CLS");
@@ -364,6 +372,7 @@ void print_tabs(struct List plist)
 				plist.begin->data.depTime.hrs, plist.begin->data.depTime.mins, plist.begin->data.travTime.hrs, plist.begin->data.travTime.mins, plist.begin->data.avTick);
 
 			plist.begin = plist.begin->next;
+			i++;
 		}
 		puts("|____|________________|________|_________|__________|");
 		if (plist.begin)
@@ -372,6 +381,12 @@ void print_tabs(struct List plist)
 				puts("                                                   r>");
 			else
 				puts("<l                                                 r>");
+		}
+		else if (i <= N_OF_TABS)
+		{
+			puts("                                                     ");
+			getchar();
+			return;
 		}
 		else 
 			puts("<l                                                   ");
@@ -568,7 +583,7 @@ struct List delete_node(struct List plist)
 	return plist;
 }
 
-struct List delete_node_beg(struct List plist)			/*Delete's node in the beginning*/
+struct List delete_node_beg(struct List plist)			/*Deletes node in the beginning*/
 {
 	list tmp;
 
@@ -588,7 +603,7 @@ struct List delete_node_beg(struct List plist)			/*Delete's node in the beginnin
 	}
 }
 
-struct List delete_node_end(struct List plist)				/*Delete's node in the end of the list*/
+struct List delete_node_end(struct List plist)				/*Deletes node in the end of the list*/
 {
 	list tmp;
 
