@@ -5,6 +5,7 @@
 
 #define ST_SYMBOLS 16
 #define TIME_SYMBOLS 3
+#define N_OF_TABS 3
 
 struct TimeCont
 {
@@ -53,6 +54,7 @@ void nullTheList(list plist);
 void delete_list(list);
 void edit_list(list);
 void print_list(struct List);
+void print_tabs(struct List);
 void print_list_structure(struct List);
 void search_list(struct List);
 
@@ -75,7 +77,7 @@ int main(int argc, char* argv[])
 		switch (mnCh)
 		{
 		case '1': trains = new_node_org(trains, input_train()); break;
-		case '2': print_list(trains); break;
+		case '2': print_tabs(trains); break;
 		case '3': search_list(trains); break;
 		case '4': trains = delete_node(trains); break;
 		case '5': trains = new_node_create(trains, input_train()); break;
@@ -211,7 +213,8 @@ struct List new_node_org(struct List plist, DataType new_train)			/*Organized ad
 		plist = new_node_start(plist, new_train);
 	else
 	{
-		while (tempList.begin != NULL && new_train.number >= tempList.begin->data.number)
+
+		while (tempList.begin != NULL && new_train.number >= tempList.begin->data.number)/**/
 			tempList.begin = tempList.begin->next;
 
 		if (tempList.begin == NULL)
@@ -332,26 +335,84 @@ void print_list(struct List cur)		/*This function prints contents of linked list
 		offset++;
 	}
 
-	/*
-	puts("Enter number of objects on one page:");
-	scanf("%d", &k); getchar();
-	while (offset <= k && cur != NULL)
-
-	{
-		puts("|  N  |  Station name  |Dep.time|Trav.time|Av.tickets|");
-		puts("------------------------------------------------------");
-		for (i = 0; i < k && cur != NULL; i++)
-		{
-			printf("|%4d|%16s| %5s  |  %5s  |    %c    |\n", cur->data.number, cur->data.stName,
-				cur->data.depTime, cur->data.travTime, cur->data.avTick);
-			cur = cur->prev;
-
-			offset++;
-		}
-		if (cur == NULL && cur->prev != NULL);
-			puts("<l--------------------------------------------------r>");
-	}*/
 	getchar();
+}
+
+void print_tabs(struct List plist)
+{
+	char dr = NULL;
+	int i, offset = 0;
+	struct Node* tmp = plist.begin;
+
+	system("CLS");
+	if (plist.begin == NULL)
+	{
+		puts("List is empty");
+		getchar();
+		return;
+	}
+
+	do
+	{
+		system("CLS");
+		puts("|  N |  Station name  |Dep.time|Trav.time|Av.tickets|");
+		puts("|----|----------------|--------|---------|----------|");
+
+		for (offset = 0; plist.begin && offset < N_OF_TABS; offset++)
+		{
+			printf("|%4d|%16s| %2s:%2s  |  %2s:%2s  |    %c     |\n", plist.begin->data.number, plist.begin->data.stName,
+				plist.begin->data.depTime.hrs, plist.begin->data.depTime.mins, plist.begin->data.travTime.hrs, plist.begin->data.travTime.mins, plist.begin->data.avTick);
+
+			plist.begin = plist.begin->next;
+		}
+		puts("|____|________________|________|_________|__________|");
+		if (plist.begin)
+		{
+			if (tmp->prev == NULL)
+				puts("                                                   r>");
+			else
+				puts("<l                                                 r>");
+		}
+		else 
+			puts("<l                                                   ");
+		puts("                  Enter 'e' to exit");
+		scanf("%c", &dr); getchar();
+		if (dr == 'l')
+		{
+			if (plist.begin)
+			{
+				if (plist.begin->prev == NULL)
+				{
+					printf("\nInvalid direction");
+					getchar();
+				}
+				else
+				{
+					for (offset = 0; offset < N_OF_TABS && tmp->prev; offset++)
+						tmp = tmp->prev;
+					plist.begin = tmp;
+				}
+			}
+			else
+			{
+				for (i = 0; i <= offset + 1; i++)
+					tmp = tmp->prev;
+				plist.begin = tmp;
+			}
+		}
+		else if (dr == 'r')
+		{
+			if (plist.begin == NULL)
+			{
+				plist.begin = tmp;
+				printf("\nInvalid direction");
+				getchar();
+			}
+			else
+				tmp = plist.begin;
+		}
+
+	} while (dr != 'e' && dr != 'E');
 }
 
 void print_list_structure(struct List plist)
@@ -375,7 +436,7 @@ void print_list_structure(struct List plist)
 void search_list(struct List cur)
 {
 	char dst[ST_SYMBOLS];
-	int i, k = 0, bound1 = 0, bound2 = 0, idepTime = 0;
+	int k = 0, bound1 = 0, bound2 = 0, idepTime = 0;
 	struct TimeCont tb1, tb2;
 
 	if (cur.begin == NULL)
@@ -390,19 +451,19 @@ void search_list(struct List cur)
 	gets(dst);
 	puts("Enter time interval\nHours from:");
 	gets(tb1.hrs);
-	puts("\nMinutes from:");
+	puts("Minutes from:");
 	gets(tb1.mins);
 	puts("To:\nHours to:");
 	gets(tb2.hrs);
-	puts("To:\nMinutes to:");
+	puts("Minutes to:");
 	gets(tb2.mins);
 
 	bound1 = timeContToInt(tb1);
 	bound2 = timeContToInt(tb2);
 
 	system("CLS");
-	puts("|  N  |  Station name  |Dep.time|Trav.time|Av.tickets|");
-	puts("------------------------------------------------------");
+	puts("|  N |  Station name  |Dep.time|Trav.time|");
+	puts("|----|----------------|--------|---------|");
 
 	while (cur.begin != NULL)
 	{
@@ -413,9 +474,8 @@ void search_list(struct List cur)
 			{
 				if (idepTime > bound1 && idepTime < bound2)
 				{
-					printf("|%4d|%16s| %2s:%2s  |  %2s:%2s  |    %c    |\n", cur.begin->data.number, cur.begin->data.stName,
-						cur.begin->data.depTime.hrs, cur.begin->data.depTime.mins, cur.begin->data.travTime.hrs, cur.begin->data.travTime.mins,
-						cur.begin->data.avTick);
+					printf("|%4d|%16s| %2s:%2s  |  %2s:%2s  |\n", cur.begin->data.number, cur.begin->data.stName,
+						cur.begin->data.depTime.hrs, cur.begin->data.depTime.mins, cur.begin->data.travTime.hrs, cur.begin->data.travTime.mins);
 				}
 			}
 
@@ -429,9 +489,25 @@ void search_list(struct List cur)
 	{
 		system("CLS");
 		puts("No matching results");
+		getchar();
+		return;
 	}
-
-	getchar();
+	else
+	{
+		puts("Enter train number to find ticket: ");
+		scanf("%d", &k);
+		cur.begin = cur.begin->prev;				/**/
+		while (cur.begin != NULL && cur.begin->data.number != k)
+			cur.begin = cur.begin->prev;
+		if (cur.begin != NULL)
+		{
+			if (cur.begin->data.avTick == 'y')
+				printf("\nYes");
+			else
+				printf("\nNo");
+		}
+		
+	}
 }
 
 int timeContToInt(struct TimeCont tConv)			/*Converts time from TimeCont structs to integer*/
