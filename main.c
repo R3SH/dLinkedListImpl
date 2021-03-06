@@ -539,6 +539,7 @@ void print_list_structure(struct List plist)
 
 void search_list(struct List cur)
 {
+	struct Node* tmp = cur.begin;
 	char dst[ST_SYMBOLS];
 	int k = 0, bound1 = 0, bound2 = 0, idepTime = 0;
 	struct TimeCont tb1, tb2;
@@ -571,9 +572,12 @@ void search_list(struct List cur)
 
 	while (cur.begin != NULL)
 	{
+		tmp = cur.begin;
+
 		if (strcmp(cur.begin->data.stName, dst) == 0)
 		{
 			idepTime = timeContToInt(cur.begin->data.depTime);
+
 			if (idepTime != 0)
 			{
 				if (idepTime > bound1 && idepTime < bound2)
@@ -599,18 +603,18 @@ void search_list(struct List cur)
 	else
 	{
 		puts("Enter train number to find ticket: ");
-		scanf("%d", &k);
-		cur.begin = cur.begin->prev;				/**/
-		while (cur.begin != NULL && cur.begin->data.number != k)
-			cur.begin = cur.begin->prev;
-		if (cur.begin != NULL)
+		scanf("%d", &k); getchar();
+		while (tmp != NULL && tmp->data.number != k)
+			tmp = tmp->prev;
+		if (tmp != NULL)
 		{
-			if (cur.begin->data.avTick == 'y')
+			if (tmp->data.avTick == 'y')
 				printf("\nYes");
 			else
 				printf("\nNo");
 		}
-		
+
+		getchar();
 	}
 }
 
