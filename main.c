@@ -5,7 +5,7 @@
 
 #define ST_SYMBOLS 16
 #define TIME_SYMBOLS 3
-#define N_OF_TABS 3
+#define N_OF_TABS 4
 
 struct TimeCont
 {
@@ -399,9 +399,9 @@ void print_tabs(struct List plist)
 		scanf("%c", &dr); getchar();
 		if (dr == 'l')
 		{
-			if (plist.begin)
+			if (plist.begin)		/*not the end of list*/
 			{
-				if (plist.begin->prev == NULL)
+				if (tmp->prev == NULL)
 				{
 					printf("\nInvalid direction");
 					getchar();
@@ -415,7 +415,7 @@ void print_tabs(struct List plist)
 			}
 			else
 			{
-				for (i = 0; i <= offset + 1; i++)
+				for (i = 0; i < N_OF_TABS && tmp->prev; i++)
 					tmp = tmp->prev;
 				plist.begin = tmp;
 			}
@@ -485,7 +485,7 @@ void print_tabs_rev(struct List plist)
 		{
 			if (plist.end)
 			{
-				if (plist.end->next == NULL)
+				if (tmp->next == NULL)
 				{
 					printf("\nInvalid direction");
 					getchar();
